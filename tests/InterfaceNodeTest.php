@@ -1,7 +1,9 @@
 <?php
 namespace Pharborist;
 
-class InterfaceNodeTest extends \PHPUnit_Framework_TestCase {
+use PHPUnit\Framework\TestCase;
+
+class InterfaceNodeTest extends TestCase {
   public function testGetMethodNames() {
     /** @var \Pharborist\Objects\InterfaceNode $interface */
     $interface = Parser::parseSnippet('interface Foo { public function wambooli(); }');
@@ -30,6 +32,15 @@ class InterfaceNodeTest extends \PHPUnit_Framework_TestCase {
     $this->assertInstanceOf('\Pharborist\Objects\InterfaceMethodNode', $method);
     $this->assertEquals('wambooli', $method->getName()->getText());
     $this->assertNull($interface->getMethod('harrr'));
+  }
+
+  public function testParseReturnByReference() {
+    /** @var \Pharborist\Objects\InterfaceNode $interface */
+    $interface = Parser::parseSnippet('interface Foo { public function &getBar(); }');
+    $method = $interface->getMethod('getBar');
+    $this->assertNotNull($method->getReference());
+    $this->assertEquals('&', $method->getReference()->getText());
+    $this->assertEquals('getBar', $method->getName()->getText());
   }
 
   public function testGetConstants() {

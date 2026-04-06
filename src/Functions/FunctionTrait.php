@@ -32,7 +32,7 @@ trait FunctionTrait {
     if ($is_reference) {
       if (!isset($this->reference)) {
         /** @var \Pharborist\Functions\FunctionDeclarationNode|\Pharborist\Objects\ClassMethodNode|\Pharborist\Objects\InterfaceMethodNode $this */
-        $this->reference = Token::reference();
+        $this->reference = Token::nonVariableReference();
         $this->name->before($this->reference);
       }
     }
@@ -58,8 +58,8 @@ trait FunctionTrait {
     if (!$return_tag) {
       return FALSE;
     }
-    $types = $return_tag->getTypes();
-    return !empty($types);
+    $type = $return_tag->getType();
+    return $type !== null;
   }
 
   /**
@@ -78,7 +78,7 @@ trait FunctionTrait {
     if (!$return_tag) {
       return $types;
     }
-    $types = Types::normalize($return_tag->getTypes());
+    $types = Types::normalize(Types::fromDocType($return_tag->getType()));
     if (empty($types)) {
       $types[] = 'void';
     }

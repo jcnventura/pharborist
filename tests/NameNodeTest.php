@@ -6,8 +6,9 @@ use Pharborist\Namespaces\NameNode;
 use Pharborist\Namespaces\NamespaceNode;
 use Pharborist\Objects\ClassMethodCallNode;
 use Pharborist\Objects\NewNode;
+use PHPUnit\Framework\TestCase;
 
-class NameNodeTest extends \PHPUnit_Framework_TestCase {
+class NameNodeTest extends TestCase {
   public function testUnqualified() {
     $snippet = <<<'EOF'
 namespace Top\Sub {
@@ -551,6 +552,78 @@ EOF;
     $this->assertTrue($name->isRelative());
     $this->assertEquals('namespace\Level\MyClass', $name->getText());
     $this->assertEquals('\Level\MyClass', $name->getAbsolutePath());
+  }
+
+  public function testGetPathAndParts() {
+    $snippet = <<<'EOF'
+namespace Top\Sub {
+  new MyClass();
+  new My\MyClass();
+  new \Top\MyClass();
+  new namespace\MyClass();
+}
+EOF;
+    /** @var NamespaceNode $namespace */
+    $namespace = Parser::parseSnippet($snippet);
+
+    /** @var StatementNode[] $statements */
+    $statements = $namespace->getBody()->getStatements();
+
+    // Unqualified name
+    /** @var ExpressionStatementNode $statement */
+    $statement = $statements[0];
+    /** @var NewNode $new */
+    $new = $statement->getExpression();
+    $name = $new->getClassName();
+    $this->assertTrue($name->isUnqualified());
+    $this->assertEquals('MyClass', $name->getPath());
+    $this->assertEquals(['MyClass'], $name->getPathParts());
+
+    // Qualified name
+    $statement = $statements[1];
+    $new = $statement->getExpression();
+    $name = $new->getClassName();
+    $this->assertTrue($name->isQualified());
+    $this->assertEquals('My\MyClass', $name->getPath());
+    $this->assertEquals(['My', 'MyClass'], $name->getPathParts());
+
+    // Fully qualified name
+    $statement = $statements[2];
+    $new = $statement->getExpression();
+    $name = $new->getClassName();
+    $this->assertTrue($name->isAbsolute());
+    $this->assertEquals('\Top\MyClass', $name->getPath());
+    $this->assertEquals(['Top', 'MyClass'], $name->getPathParts());
+
+    // Relative name
+    $statement = $statements[3];
+    $new = $statement->getExpression();
+    $name = $new->getClassName();
+    $this->assertTrue($name->isRelative());
+    $this->assertEquals('namespace\MyClass', $name->getPath());
+    $this->assertEquals(['namespace', 'MyClass'], $name->getPathParts());
+  }
+
+  public function testQualifiedNameNamespace() {
+    $snippet = <<<'EOF'
+namespace MyModule {
+  new Drupal\MyClass();
+}
+EOF;
+    /** @var NamespaceNode $namespace */
+    $namespace = Parser::parseSnippet($snippet);
+
+    /** @var StatementNode[] $statements */
+    $statements = $namespace->getBody()->getStatements();
+
+    /** @var ExpressionStatementNode $statement */
+    $statement = $statements[0];
+    /** @var NewNode $new */
+    $new = $statement->getExpression();
+    $name = $new->getClassName();
+    $this->assertInstanceOf(NamespaceNode::class, $name->getNamespace());
+    $this->assertEquals('Drupal\MyClass', $name->getPath());
+    $this->assertEquals('\MyModule\Drupal\MyClass', $name->getAbsolutePath());
   }
 
   public function testPath() {

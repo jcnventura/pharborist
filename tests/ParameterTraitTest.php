@@ -3,11 +3,13 @@ namespace Pharborist;
 
 use Pharborist\Functions\FunctionDeclarationNode;
 use Pharborist\Functions\ParameterNode;
+use PHPUnit\Framework\Attributes\Depends;
+use PHPUnit\Framework\TestCase;
 
 /**
  * Tests various methods of ParameterTrait.
  */
-class ParameterTraitTest extends \PHPUnit_Framework_TestCase {
+class ParameterTraitTest extends TestCase {
   public function testHasParameter() {
     /** @var \Pharborist\Functions\FunctionDeclarationNode $function */
     $function = Parser::parseSnippet('function foo(stdClass &$a = NULL) { $a = new stdClass(); }');
@@ -43,9 +45,7 @@ class ParameterTraitTest extends \PHPUnit_Framework_TestCase {
     $this->assertEquals('$c', $parameters[3]);
   }
 
-  /**
-   * @depends testHasParameter
-   */
+  #[Depends('testHasParameter')]
   public function testAppendParameter() {
     /** @var \Pharborist\Functions\FunctionDeclarationNode $function */
     $function = Parser::parseSnippet('function baz() {}');
@@ -59,16 +59,11 @@ class ParameterTraitTest extends \PHPUnit_Framework_TestCase {
     $this->assertTrue($function->hasParameter('trinity'));
   }
 
-  /**
-   * @expectedException \InvalidArgumentException
-   */
   public function testHasParamterInvalidArgumentException() {
+    $this->expectException(\InvalidArgumentException::class);
     Parser::parseSnippet('function foo($bar) {}')->hasParameter(1);
   }
 
-  /**
-   * @requires PHP 5.6
-   */
   public function testIsVariadic() {
     $doc = <<<'END'
 <?php

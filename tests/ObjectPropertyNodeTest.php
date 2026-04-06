@@ -2,8 +2,10 @@
 namespace Pharborist;
 
 use Pharborist\Objects\ObjectPropertyNode;
+use PHPUnit\Framework\Attributes\Depends;
+use PHPUnit\Framework\TestCase;
 
-class ObjectPropertyNodeTest extends \PHPUnit_Framework_TestCase {
+class ObjectPropertyNodeTest extends TestCase {
   public function testGetRootProperty() {
     /** @var ObjectPropertyNode $property */
     $property = Parser::parseExpression('$foo->bar->baz');
@@ -15,9 +17,7 @@ class ObjectPropertyNodeTest extends \PHPUnit_Framework_TestCase {
     $this->assertEquals('$bar', $property->getRootProperty()->getText());
   }
 
-  /**
-   * @depends testGetRootProperty
-   */
+  #[Depends('testGetRootProperty')]
   public function testGetPropertyName() {
     /** @var ObjectPropertyNode $property */
     $property = Parser::parseExpression('$node->field_foo');

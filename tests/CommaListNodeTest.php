@@ -1,18 +1,11 @@
 <?php
 namespace Pharborist;
 
-class CommaListNodeTest extends \PHPUnit_Framework_TestCase {
-  /**
-   * Create mock Node.
-   * @param $text
-   * @return Node
-   */
-  protected function createNode($text) {
-    $mock = $this->getMockForAbstractClass('\Pharborist\Node');
-    $mock->expects($this->any())
-      ->method('getText')
-      ->will($this->returnValue($text));
-    return $mock;
+use PHPUnit\Framework\TestCase;
+
+class CommaListNodeTest extends TestCase {
+  protected function createNode($text): TestNode {
+    return new TestNode($text);
   }
 
   public function testGet() {

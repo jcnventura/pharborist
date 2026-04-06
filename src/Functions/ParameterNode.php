@@ -127,7 +127,7 @@ class ParameterNode extends ParentNode {
   public function setReference($is_reference) {
     if ($is_reference) {
       if (!isset($this->reference)) {
-        $this->reference = Token::reference();
+        $this->reference = Token::variableReference();
         $this->name->before($this->reference);
       }
     }
@@ -275,7 +275,7 @@ class ParameterNode extends ParentNode {
   /**
    * Get the doc block tag associated with this parameter.
    *
-   * @return null|\phpDocumentor\Reflection\DocBlock\Tag\ParamTag
+   * @return null|\phpDocumentor\Reflection\DocBlock\Tags\Param
    *   The parameter tag or null if not found.
    */
   public function getDocBlockTag() {
@@ -297,8 +297,8 @@ class ParameterNode extends ParentNode {
     if (!$param_tag) {
       return FALSE;
     }
-    $types = $param_tag->getTypes();
-    return !empty($types);
+    $type = $param_tag->getType();
+    return $type !== null;
   }
 
   /**
@@ -318,7 +318,7 @@ class ParameterNode extends ParentNode {
     if (!$param_tag) {
       return $types;
     }
-    $types = Types::normalize($param_tag->getTypes());
+    $types = Types::normalize(Types::fromDocType($param_tag->getType()));
     if (empty($types)) {
       $types[] = 'mixed';
     }
@@ -359,14 +359,15 @@ class ParameterNode extends ParentNode {
     $this->setReference($reflector->isPassedByReference());
 
     // Match the reflector's type hint.
-    if ($reflector->isArray()) {
-      $this->setTypeHint('array');
-    }
-    elseif ($reflector->isCallable()) {
-      $this->setTypeHint('callable');
-    }
-    elseif ($class = $reflector->getClass()) {
-      $this->setTypeHint($class->getName());
+    $type = $reflector->getType();
+    if ($type instanceof \ReflectionNamedType) {
+      $name = $type->getName();
+      if (!$type->isBuiltin()) {
+        $this->setTypeHint($name);
+      }
+      elseif ($name === 'array' || $name === 'callable') {
+        $this->setTypeHint($name);
+      }
     }
 
     // Match the reflector's default value, if there is one. It will be a

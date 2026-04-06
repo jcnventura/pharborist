@@ -3,8 +3,9 @@
 namespace Pharborist;
 
 use Pharborist\Functions\FunctionDeclarationNode;
+use PHPUnit\Framework\TestCase;
 
-class FunctionDeclarationNodeTest extends \PHPUnit_Framework_TestCase {
+class FunctionDeclarationNodeTest extends TestCase {
   public function testCloneAsMethodOf() {
     /** @var \Pharborist\Objects\ClassNode $class */
     $class = Parser::parseSnippet('class Camelot {}');
@@ -34,6 +35,14 @@ class FunctionDeclarationNodeTest extends \PHPUnit_Framework_TestCase {
     $func->setReference(FALSE);
     $this->assertNull($func->getReference());
     $this->assertEquals('function hello() {}', $func->getText());
+  }
+
+  public function testParseReturnByReference() {
+    /** @var \Pharborist\Functions\FunctionDeclarationNode $func */
+    $func = Parser::parseSnippet('function &foo() { return $bar; }');
+    $this->assertNotNull($func->getReference());
+    $this->assertEquals('&', $func->getReference()->getText());
+    $this->assertEquals('foo', $func->getName()->getText());
   }
 
   public function testReturnType() {

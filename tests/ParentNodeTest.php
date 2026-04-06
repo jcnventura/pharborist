@@ -1,26 +1,15 @@
 <?php
 namespace Pharborist;
 
-class ParentNodeTest extends \PHPUnit_Framework_TestCase {
-  /**
-   * Create mock ParentNode.
-   * @return ParentNode
-   */
-  protected function createParentNode() {
-    return $this->getMockForAbstractClass('\Pharborist\ParentNode');
+use PHPUnit\Framework\TestCase;
+
+class ParentNodeTest extends TestCase {
+  protected function createParentNode(): TestParentNode {
+    return new TestParentNode();
   }
 
-  /**
-   * Create mock Node.
-   * @param $text
-   * @return Node
-   */
-  protected function createNode($text) {
-    $mock = $this->getMockForAbstractClass('\Pharborist\Node');
-    $mock->expects($this->any())
-      ->method('getText')
-      ->will($this->returnValue($text));
-    return $mock;
+  protected function createNode($text): TestNode {
+    return new TestNode($text);
   }
 
   public function testPrepend() {
@@ -36,10 +25,8 @@ class ParentNodeTest extends \PHPUnit_Framework_TestCase {
     $this->assertEquals('3', $parent->firstChild()->next()->next()->getText());
   }
 
-  /**
-   * @expectedException \InvalidArgumentException
-   */
   public function testInvalidPrepend() {
+    $this->expectException(\InvalidArgumentException::class);
     $parent = $this->createParentNode();
     $parent->prepend(NULL);
   }
@@ -53,10 +40,8 @@ class ParentNodeTest extends \PHPUnit_Framework_TestCase {
     $this->assertEquals('2', $parent->firstChild()->next()->next()->getText());
   }
 
-  /**
-   * @expectedException \InvalidArgumentException
-   */
   public function testInvalidAppend() {
+    $this->expectException(\InvalidArgumentException::class);
     $parent = $this->createParentNode();
     $parent->append(NULL);
   }

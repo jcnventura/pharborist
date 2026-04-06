@@ -3,16 +3,16 @@
 namespace Pharborist;
 
 use Pharborist\Variables\VariableNode;
+use PHPUnit\Framework\Attributes\Depends;
+use PHPUnit\Framework\TestCase;
 
-class VariableNodeTest extends \PHPUnit_Framework_TestCase {
+class VariableNodeTest extends TestCase {
   public function testGetName() {
     $var = new VariableNode(T_VARIABLE, '$form');
     $this->assertEquals('form', $var->getName());
   }
 
-  /**
-   * @depends testGetName
-   */
+  #[Depends('testGetName')]
   public function testSetName() {
     $var = new VariableNode(T_VARIABLE, '$x');
     $var->setName('$y');

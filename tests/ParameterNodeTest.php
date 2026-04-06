@@ -2,11 +2,12 @@
 namespace Pharborist;
 
 use Pharborist\Functions\ParameterNode;
+use PHPUnit\Framework\TestCase;
 
 /**
  * Tests various methods of ParameterNode.
  */
-class ParameterNodeTest extends \PHPUnit_Framework_TestCase {
+class ParameterNodeTest extends TestCase {
   public function testParameterNode() {
     $source = <<<'EOF'
 <?php
@@ -47,13 +48,13 @@ EOF;
     $this->assertFalse($parameter->isRequired());
     $param_tag = $parameter->getDocBlockTag();
     $this->assertNotNull($param_tag);
-    $this->assertEquals('$a', $param_tag->getVariableName());
-    $types = $param_tag->getTypes();
+    $this->assertEquals('a', $param_tag->getVariableName());
+    $types = \Pharborist\Types::fromDocType($param_tag->getType());
     $this->assertCount(1, $types);
     $this->assertEquals('\MyNamespace\MyClass', $types[0]);
-    $this->assertEquals('\MyNamespace\MyClass', $param_tag->getType());
+    $this->assertEquals('\MyNamespace\MyClass', (string) $param_tag->getType());
     $this->assertFalse($param_tag->isVariadic());
-    $this->assertEquals('A test parameter.', $param_tag->getDescription());
+    $this->assertEquals('A test parameter.', trim((string) $param_tag->getDescription()));
     $this->assertEquals($types, $parameter->getTypes());
 
     $parameter->setName('b', TRUE);
@@ -77,13 +78,13 @@ EOF;
     $this->assertTrue($parameter->isRequired());
     $param_tag = $parameter->getDocBlockTag();
     $this->assertNotNull($param_tag);
-    $this->assertEquals('$c', $param_tag->getVariableName());
-    $types = $param_tag->getTypes();
+    $this->assertEquals('c', $param_tag->getVariableName());
+    $types = Types::fromDocType($param_tag->getType());
     $this->assertCount(1, $types);
     $this->assertEquals('\MyNamespace\SomeClass', $types[0]);
-    $this->assertEquals('\MyNamespace\SomeClass', $param_tag->getType());
+    $this->assertEquals('\MyNamespace\SomeClass', (string) $param_tag->getType());
     $this->assertFalse($param_tag->isVariadic());
-    $this->assertEquals('Parameter using alias.', $param_tag->getDescription());
+    $this->assertEquals('Parameter using alias.', trim((string) $param_tag->getDescription()));
     $this->assertEquals($types, $parameter->getTypes());
 
     $parameter = $function->getParameter(2);
@@ -95,13 +96,13 @@ EOF;
     $this->assertTrue($parameter->isRequired());
     $param_tag = $parameter->getDocBlockTag();
     $this->assertNotNull($param_tag);
-    $this->assertEquals('$data', $param_tag->getVariableName());
-    $types = $param_tag->getTypes();
+    $this->assertEquals('data', $param_tag->getVariableName());
+    $types = Types::fromDocType($param_tag->getType());
     $this->assertCount(1, $types);
     $this->assertEquals('array', $types[0]);
-    $this->assertEquals('array', $param_tag->getType());
+    $this->assertEquals('array', (string) $param_tag->getType());
     $this->assertFalse($param_tag->isVariadic());
-    $this->assertEquals('An array parameter.', $param_tag->getDescription());
+    $this->assertEquals('An array parameter.', trim((string) $param_tag->getDescription()));
     $this->assertEquals($types, $parameter->getTypes());
 
     $parameter = $function->getParameter(3);
@@ -112,13 +113,13 @@ EOF;
     $this->assertTrue($parameter->isRequired());
     $param_tag = $parameter->getDocBlockTag();
     $this->assertNotNull($param_tag);
-    $this->assertEquals('$callback', $param_tag->getVariableName());
-    $types = $param_tag->getTypes();
+    $this->assertEquals('callback', $param_tag->getVariableName());
+    $types = Types::fromDocType($param_tag->getType());
     $this->assertCount(1, $types);
     $this->assertEquals('callable', $types[0]);
-    $this->assertEquals('callable', $param_tag->getType());
+    $this->assertEquals('callable', (string) $param_tag->getType());
     $this->assertFalse($param_tag->isVariadic());
-    $this->assertEquals('A callable parameter.', $param_tag->getDescription());
+    $this->assertEquals('A callable parameter.', trim((string) $param_tag->getDescription()));
     $this->assertEquals($types, $parameter->getTypes());
   }
 
@@ -214,9 +215,6 @@ EOF;
     $this->assertNull($parameter->getTypeHint());
   }
 
-  /**
-   * @requires PHP 5.6
-   */
   public function testVariadic() {
     $source = <<<'EOF'
 <?php

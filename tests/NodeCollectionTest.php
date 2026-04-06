@@ -3,25 +3,15 @@ namespace Pharborist;
 
 use Pharborist\Types\IntegerNode;
 use Pharborist\Types\StringNode;
+use PHPUnit\Framework\TestCase;
 
-class NodeCollectionTest extends \PHPUnit_Framework_TestCase {
-  /**
-   * Create mock ParentNode.
-   * @return ParentNode
-   */
-  protected function createParentNode() {
-    return $this->getMockForAbstractClass('\Pharborist\ParentNode');
+class NodeCollectionTest extends TestCase {
+  protected function createParentNode(): TestParentNode {
+    return new TestParentNode();
   }
 
-  /**
-   * Create mock Node.
-   * @return Node
-   */
-  protected function createNode() {
-    static $counter = 1;
-    $mock = $this->getMockForAbstractClass('\Pharborist\Node');
-    $mock->id = $counter++;
-    return $mock;
+  protected function createNode(): TestNode {
+    return new TestNode();
   }
 
   public function testParent() {
@@ -401,16 +391,12 @@ class NodeCollectionTest extends \PHPUnit_Framework_TestCase {
   public function testReplaceWith() {
     $root = new RootNode();
     $parent_one = $this->createParentNode();
-    $parent_one->name = 'parent_one';
     $parent_one->appendTo($root);
     $one = $this->createNode();
-    $one->name = 'one';
     $one->appendTo($parent_one);
     $parent_two = $this->createParentNode();
-    $parent_two->name = 'parent_two';
     $parent_two->appendTo($root);
     $first = $this->createNode();
-    $first->name = 'first';
     $first->appendTo($parent_two);
     $replacement = new TokenNode(T_STRING, 'replacement');
     $collection = new NodeCollection([$one, $first], FALSE);
@@ -472,10 +458,8 @@ class NodeCollectionTest extends \PHPUnit_Framework_TestCase {
     $this->assertSame($union, $c2);
   }
 
-  /**
-   * @expectedException \InvalidArgumentException
-   */
   public function testInvalidAdd() {
+    $this->expectException(\InvalidArgumentException::class);
     $collection = new NodeCollection([], FALSE);
     $collection->add(NULL);
   }
@@ -488,10 +472,8 @@ class NodeCollectionTest extends \PHPUnit_Framework_TestCase {
     $this->assertTrue(isset($collection[0]));
   }
 
-  /**
-   * @expectedException \BadMethodCallException
-   */
   public function testSet() {
+    $this->expectException(\BadMethodCallException::class);
     $root = new RootNode();
     $first = $this->createNode();
     $first->appendTo($root);
@@ -500,10 +482,8 @@ class NodeCollectionTest extends \PHPUnit_Framework_TestCase {
     $collection[0] = $second;
   }
 
-  /**
-   * @expectedException \BadMethodCallException
-   */
   public function testUnset() {
+    $this->expectException(\BadMethodCallException::class);
     $root = new RootNode();
     $first = $this->createNode();
     $first->appendTo($root);
